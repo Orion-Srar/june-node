@@ -1,0 +1,22 @@
+{
+  "name": "june-node",
+  "version": "1.0.0",
+  "description": "JUNE-NODE-NODEJS",
+  "main": "app.js",
+  "scripts": {
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Orion-Srar/june-node.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Orion-Srar/june-node/issues"
+  },
+  "homepage": "https://github.com/Orion-Srar/june-node#readme",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
