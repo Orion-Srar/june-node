@@ -22,6 +22,18 @@ router.post(
 );
 
 router.post(
+    '/changePassword',
+    commonMiddleware.isBodyValid(UserValidator.changePassword),
+    authMiddleware.checkAccessToken,
+    authController.changePassword
+);
+
+router.post(
+    '/loginEmail',
+
+)
+
+router.post(
     '/refresh',
     authMiddleware.checkRefreshToken,
     authController.refresh

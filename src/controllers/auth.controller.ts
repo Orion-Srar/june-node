@@ -13,7 +13,7 @@ class AuthController {
             next(e);
         }
 
-    }
+    };
 
     public async login(req: Request, res: Response, next: NextFunction): Promise<Response<ITokenPair>> {
         try {
@@ -26,14 +26,26 @@ class AuthController {
         } catch (e) {
             next(e);
         }
-    }
+    };
+
+    public async changePassword(req: Request, res: Response, next: NextFunction): Promise<Response<ITokenPair>> {
+        try {
+            const {_id: userId} = req.res.locals.tokenPayload as ITokenPayload;
+
+            await authService.changePassword(req.body, userId);
+
+            return res.sendStatus(201);
+        } catch (e) {
+            next(e);
+        }
+    };
 
     public async refresh(req: Request, res: Response, next: NextFunction): Promise<Response<ITokenPair>> {
         try {
             const oldTokenPair = req.res.locals.oldTokenPair as ITokenPair;
             const tokenPayload = req.res.locals.tokenPayload as ITokenPayload;
 
-            const tokensPair  = await authService.refresh(oldTokenPair, tokenPayload);
+            const tokensPair = await authService.refresh(oldTokenPair, tokenPayload);
 
             return res.status(200).json(tokensPair)
         } catch (e) {

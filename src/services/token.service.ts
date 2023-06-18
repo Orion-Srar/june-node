@@ -7,7 +7,7 @@ import {ETokenType} from "../enums";
 
 class TokenService {
     public generateTokenPair(payload: ITokenPayload): ITokenPair {
-        const accessToken = jwt.sign(payload, configs.JWT_ACCESS_SECRET, {expiresIn: '10s'})
+        const accessToken = jwt.sign(payload, configs.JWT_ACCESS_SECRET, {expiresIn: '50s'})
         const refreshToken = jwt.sign(payload, configs.JWT_REFRESH_SECRET, {expiresIn: '30d'})
 
         return {

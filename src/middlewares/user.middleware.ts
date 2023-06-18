@@ -7,7 +7,7 @@ class UserMiddleware {
     public isUserExist<T>(field: keyof T) {
         return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
             try {
-                const user = await User.findOne({[field]: req.body[field]});
+                const user = await User.findOne({[field]: req.body[field]}).select('password');
                 if (!user) {
                     throw new ApiError('User not found', 422)
                 }
@@ -23,11 +23,11 @@ class UserMiddleware {
     public async findAndThrow(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const user = await User.findOne({email: req.body.email});
-            if (user){
+            if (user) {
                 throw new ApiError('User with this email already exist', 409);
             }
             next();
-        }catch (e) {
+        } catch (e) {
             next(e);
         }
     }
