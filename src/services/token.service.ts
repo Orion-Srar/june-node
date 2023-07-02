@@ -3,11 +3,11 @@ import * as jwt from 'jsonwebtoken';
 import {ITokenPair, ITokenPayload} from "../types";
 import {configs} from "../configs";
 import {ApiError} from "../errors";
-import {ETokenType} from "../enums";
+import {EActionTokenTypes, ETokenType} from "../enums";
 
 class TokenService {
     public generateTokenPair(payload: ITokenPayload): ITokenPair {
-        const accessToken = jwt.sign(payload, configs.JWT_ACCESS_SECRET, {expiresIn: '50s'})
+        const accessToken = jwt.sign(payload, configs.JWT_ACCESS_SECRET, {expiresIn: '1d'})
         const refreshToken = jwt.sign(payload, configs.JWT_REFRESH_SECRET, {expiresIn: '30d'})
 
         return {
@@ -33,7 +33,45 @@ class TokenService {
         } catch (e) {
             throw new ApiError('Token not valid', 401);
         }
-    }
+    };
+
+    public generateActionToken(payload: ITokenPayload, tokenType: EActionTokenTypes): string {
+        try {
+            let secret: string;
+
+            switch (tokenType) {
+                case EActionTokenTypes.Forgot:
+                    secret = configs.JWT_FORGOT_SECRET;
+                    break;
+                case EActionTokenTypes.Activate:
+                    secret = configs.JWT_ACTIVATE_SECRET;
+                    break;
+            }
+
+            return jwt.sign(payload, secret, {expiresIn: "7d"});
+        } catch (e) {
+            throw new ApiError('Token not valid', 401);
+        }
+    };
+
+    public checkActionToken(token: string, tokenType: EActionTokenTypes): ITokenPayload {
+        try {
+            let secret: string;
+
+            switch (tokenType) {
+                case EActionTokenTypes.Activate:
+                    secret = configs.JWT_ACTIVATE_SECRET;
+                    break;
+                case EActionTokenTypes.Forgot:
+                    secret = configs.JWT_FORGOT_SECRET;
+                    break;
+            }
+
+            return jwt.verify(token, secret) as ITokenPayload;
+        } catch (e) {
+            throw new ApiError('Token not valid', 401);
+        }
+    };
 }
 
-export const tokenService = new TokenService();
+export const tokenService = new TokenService()

@@ -2,6 +2,7 @@ import {NextFunction, Response, Request} from "express";
 
 import {authService} from "../services";
 import {ITokenPair, ITokenPayload} from "../types";
+import {ApiError} from "../errors";
 
 class AuthController {
     public async register(req: Request, res: Response, next: NextFunction): Promise<Response<void>> {
@@ -51,7 +52,32 @@ class AuthController {
         } catch (e) {
             next(e);
         }
-    }
+    };
+
+    public async forgotPassword(req: Request, res: Response, next: NextFunction) {
+        try {
+            const {user} = req.res.locals;
+
+            await authService.forgotPassword(user._id, req.body.email);
+
+            return res.sendStatus(200)
+        } catch (e) {
+            throw new ApiError(e.message, e.status);
+        }
+    };
+
+    public async setForgotPassword(req: Request, res: Response, next: NextFunction): Promise<Response<void>> {
+        try {
+            const {password} = req.body;
+            const {jwtPayload} = req.res.locals;
+
+            await authService.setForgotPassword(password, jwtPayload._id, req.params.token)
+
+            return res.sendStatus(200);
+        } catch (e) {
+
+        }
+    };
 }
 
 export const authController = new AuthController();

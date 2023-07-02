@@ -3,7 +3,8 @@ import {NextFunction, Request, Response} from "express";
 import {ApiError} from "../errors";
 import {Token} from "../models";
 import {tokenService} from "../services";
-import {ETokenType} from "../enums";
+import {EActionTokenTypes, ETokenType} from "../enums";
+import {Action} from "../models/Actions.model";
 
 class AuthMiddleware {
     public async checkAccessToken(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -41,7 +42,6 @@ class AuthMiddleware {
             let payload = tokenService.checkToken(refreshToken, ETokenType.Refresh);
 
 
-
             const entity = await Token.findOne({refreshToken});
 
             if (!entity) {
@@ -49,13 +49,39 @@ class AuthMiddleware {
             }
 
             req.res.locals.oldTokenPair = entity;
-            req.res.locals.tokenPayload = { name: payload.name, _id: payload._id };
+            req.res.locals.tokenPayload = {name: payload.name, _id: payload._id};
             next();
         } catch (e) {
             next(e);
         }
     }
 
+    public checkActionToken(tokenType: EActionTokenTypes) {
+        return async (req: Request, res: Response, next: NextFunction) => {
+            try {
+                const actionToken = req.params.token;
+
+                if (!actionToken) {
+                    throw new ApiError('Token is not provided', 400)
+                }
+
+                const jwtPayload = tokenService.checkActionToken(actionToken, tokenType);
+
+                const tokenFromDb = await Action.findOne({ actionToken });
+
+                if(!tokenFromDb){
+                    throw new ApiError('Token is not valid', 400);
+                }
+
+                req.res.locals = { jwtPayload, tokenFromDb };
+
+                next();
+            } catch (e) {
+                next(e)
+            }
+
+        };
+    }
 
 }
 
