@@ -14,11 +14,13 @@ export class UserValidator {
         'string.pattern.base': 'Must be email like qwe@qwe.com'
     });
     static password = Joi.string().regex(regexConstants.PASSWORD).trim();
+    static phone = Joi.string().regex(regexConstants.PHONE).trim();
 
     static create = Joi.object({
         name: this.FirstName.required(),
         age: this.age.required(),
         gender: this.gender.required(),
+        phone: this.phone.required(),
         email: this.email.required(),
         password: this.password.required(),
 

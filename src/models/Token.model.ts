@@ -17,6 +17,9 @@ const tokensSchema = new Schema({
         ref: User,
     }
 
+},{
+    timestamps: true,
+    versionKey: false,
 });
 
 export const Token = model('token', tokensSchema);

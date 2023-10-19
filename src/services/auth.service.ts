@@ -8,16 +8,45 @@ import {tokenService} from "./token.service";
 import {ICredentials, ITokenPair, ITokenPayload, IUser} from "../types";
 import {passwordService} from "./password.service";
 import {Action} from "../models/Actions.model";
+import {EUserStatus} from "../enums/user-status.enum";
+import {smsService} from "./sms.service";
+import {ESmsActions} from "../enums/sms.enum";
 
 class AuthService {
     public async register(data: IUser): Promise<void> {
         try {
             const hashedPassword = await passwordService.hash(data.password);
 
-            await User.create({...data, password: hashedPassword});
+            const user = await User.create({...data, password: hashedPassword});
 
+            const actionToken = tokenService.generateActionToken({_id: user._id}, EActionTokenTypes.Activate);
 
-            await emailService.sendMail(data.email, EEmailActions.WELCOME, {name: data.name});
+            await Promise.all([
+                Action.create({
+                    actionToken,
+                    tokenType: EActionTokenTypes.Activate,
+                    _userId: user._id,
+                }),
+                emailService.sendMail(
+                    data.email,
+                    EEmailActions.WELCOME,
+                    {name: data.name, actionToken}
+                ),
+                smsService.sentSms(data.phone, ESmsActions.WELCOME),
+
+            ]);
+
+        } catch (e) {
+            throw new ApiError(e.message, e.status);
+        }
+    };
+
+    public async activate(jwtPayload: ITokenPayload): Promise<void> {
+        try {
+            await Promise.all([
+                User.updateOne({_id: jwtPayload._id}, {status: EUserStatus.Active}),
+                Action.deleteMany({_userId: jwtPayload._id, tokenType: EActionTokenTypes.Activate}),
+            ]);
 
         } catch (e) {
             throw new ApiError(e.message, e.status);
@@ -91,7 +120,7 @@ class AuthService {
         }
     };
 
-    public async forgotPassword(userId: Types.ObjectId, email: string):Promise<void> {
+    public async forgotPassword(userId: Types.ObjectId, email: string): Promise<void> {
         try {
 
             const actionToken = tokenService.generateActionToken({_id: userId}, EActionTokenTypes.Forgot);
@@ -106,16 +135,16 @@ class AuthService {
         }
     };
 
-    public async setForgotPassword(password: string, userId: Types.ObjectId, actionToken: string): Promise<void>{
+    public async setForgotPassword(password: string, userId: Types.ObjectId, actionToken: string): Promise<void> {
         try {
             const hashedPassword = await passwordService.hash(password);
 
             await Promise.all([
                 User.updateOne({_id: userId}, {password: hashedPassword}),
-                Action.deleteOne({ actionToken }),
+                Action.deleteOne({actionToken}),
             ]);
 
-        }catch (e) {
+        } catch (e) {
             throw new ApiError(e.message, e.status);
         }
     }

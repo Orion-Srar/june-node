@@ -1,0 +1,55 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "Hello this is my swagger",
+    "version": "1.0.0",
+    "title": "Swagger",
+    "contact": {
+      "email": "apiteam@swagger.io"
+    }
+  },
+  "paths": {
+    "/users": {
+      "get": {
+        "tags": [
+          "users"
+        ],
+        "description": "get all users (descriptions)",
+        "summary": "get all users (summary)",
+        "responses": {
+          "200": {
+            "description": "Returned array of users"
+          }
+        }
+      }
+    },
+    "/users/{userId}": {
+      "get": {
+        "tags": [
+          "users"
+        ],
+        "description": "get all user by id",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "hahahhahahaha"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returned user"
+          }
+        }
+      }
+    }
+  }
+}
+
